@@ -54,11 +54,27 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show($user_id)
     {
-        return response()->json($task);
-    }
+        $tasks = DB::table('tasks')->where('user_id', $user_id)->get();
+            $counter =0;
+            foreach ($tasks as $task) 
+            {
+                $counter += 1;
+                $response = 
+                [ 
+                    'name' => $task->name,
+                    "description" => $task->description,
+                    "start_date" => $task->start_date,
+                    "end_date" => $task->end_date,
+                    "finished" => $task->finished,
+                    'aantal keer geteld' => $counter
+                ];
+            $totaleResponse [] = $response;
 
+            }
+            return response()->json($totaleResponse);
+    }
     /**
      * Update the specified resource in storage.
      */

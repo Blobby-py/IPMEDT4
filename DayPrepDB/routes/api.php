@@ -21,8 +21,13 @@ use Illuminate\Support\Facades\Route;
 // Example of a custom rout
 Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
 Route::post('/tasks/store', [TaskController::class, 'store']);
+Route::get('/tasks/show/{user_id}', [TaskController::class, 'show']);
+
+
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
