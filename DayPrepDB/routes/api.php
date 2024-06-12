@@ -20,9 +20,10 @@ use Illuminate\Support\Facades\Route;
 
 // Example of a custom rout
 Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
+
 Route::post('/tasks/store', [TaskController::class, 'store']);
 Route::get('/tasks/show/{user_id}', [TaskController::class, 'show']);
-
+Route::delete('/tasks/destroy/{id}', [TaskController::class, 'destroy']);
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
