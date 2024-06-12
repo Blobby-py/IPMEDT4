@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskUpdateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,3 +27,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Example of a custom route
 Route::post('/tasks/store', [TaskController::class, 'store']);
+
+Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
