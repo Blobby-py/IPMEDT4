@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Example of a custom rout
+Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
 Route::post('/tasks/store', [TaskController::class, 'store']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -28,8 +29,3 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->get('/auth/me', [AuthController::class, 'me']);
-
-// Example of a custom route
-Route::post('/tasks/store', [TaskController::class, 'store']);
-
-Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
