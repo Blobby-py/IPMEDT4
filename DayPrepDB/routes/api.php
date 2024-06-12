@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Example of a custom route
+// Example of a custom rout
 Route::post('/tasks/store', [TaskController::class, 'store']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
