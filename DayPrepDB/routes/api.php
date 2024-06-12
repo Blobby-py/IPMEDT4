@@ -29,7 +29,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->get('/auth/me', [AuthController::class, 'me']);
 
-// Example of a custom route
-Route::post('/tasks/store', [TaskController::class, 'store']);
-
 Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
