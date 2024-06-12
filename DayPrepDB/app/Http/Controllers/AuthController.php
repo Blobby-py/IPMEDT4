@@ -65,4 +65,14 @@ class AuthController extends Controller
         $response = ["message" => "Incorrect email or password"];
         return response()->json($response, 400);
     }
+
+    public function me(Request $req) {
+        $user = $req->user();
+        $response = [
+            "name" => $user->name,
+            "email" => $user->email,
+            "id" => $user->id
+        ];
+        return response()->json($response);
+    }
 }
