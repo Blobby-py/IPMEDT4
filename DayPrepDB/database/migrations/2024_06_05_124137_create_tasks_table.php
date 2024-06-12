@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
-            $table->boolean('finished');
-            $table->foreignId('user_id')->constrained();
+            $table->boolean('finished')->default(false);
+            $table->integer('user_id');
             $table->timestamps();
         });
     }
