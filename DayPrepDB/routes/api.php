@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskUpdateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SingleTaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,11 @@ use Illuminate\Support\Facades\Route;
 
 // Example of a custom rout
 Route::put('/tasks/update', [TaskUpdateController::class, 'update']);
+
+Route::get('/tasks/display/{id}', [SingleTaskController::class, 'display']);
+
+Route::get('/tasks/showFinished/{user_id}', [TaskController::class, 'showFinished']);
+
 
 Route::post('/tasks/store', [TaskController::class, 'store']);
 Route::get('/tasks/show/{user_id}', [TaskController::class, 'show']);

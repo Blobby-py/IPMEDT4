@@ -6,6 +6,7 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use SebastianBergmann\LinesOfCode\Counter;
 
 class TaskController extends Controller
 {
@@ -26,8 +27,8 @@ class TaskController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'start_date' => 'nullable|string',
+            'end_date' => 'nullable|string',
             'finished' => 'required|boolean',
             'user_id' => 'required|integer',
         ];
@@ -57,38 +58,40 @@ class TaskController extends Controller
     public function show($user_id)
     {
         $tasks = DB::table('tasks')->where('user_id', $user_id)->get();
-            $counter =0;
             foreach ($tasks as $task) 
             {
-                $counter += 1;
                 $response = 
-                [ 
+                [
                     'name' => $task->name,
                     "description" => $task->description,
                     "start_date" => $task->start_date,
                     "end_date" => $task->end_date,
                     "finished" => $task->finished,
-                    'aantal keer geteld' => $counter
                 ];
             $totaleResponse [] = $response;
 
             }
             return response()->json($totaleResponse);
     }
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $req)
-    {
-        // 
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {        
         $task = DB::table('tasks')->where('id', $id)->delete();
         return response()->json(["De taak ", $task, " is succesvol verwijderd", 204]);
     }
+
+
+    public function showFinished($user_id)
+    {
+        $tasks = DB::table('tasks')->where('user_id', $user_id)->get();
+            $finishedCounter = 0;
+            foreach ($tasks as $task) 
+            {
+                if ($task->finished){
+                    $finishedCounter += 1;
+                }
+            }
+            return response()->json($finishedCounter);
+    }
+
 }
