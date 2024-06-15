@@ -1,3 +1,4 @@
+// Impports
 import 'package:flutter/material.dart';
 import 'package:flutter_test_input/Services/globals.dart';
 import 'package:http/http.dart' as http;
@@ -102,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  // Function to create an overlay to add a new task
+  // Function to create an overlay to add a new task or edit an existing task
   void showCreateTaskOverlay(BuildContext context, {Map<String, dynamic>? initialTask}) {
     // Initialize text controllers and date variables
     _taskNameController.text = initialTask != null ? initialTask['name'] ?? '' : '';
@@ -236,7 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.of(context).pop();
                   },
                 ),
-
                 TextButton(
                   style: TextButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(3, 200, 98, 100),
@@ -257,7 +257,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     if (initialTask != null) {
                       // Handle update task logic
-                      print("EDIT TASK");
+                      await AuthServices.updateTask(
+                        initialTask['task_id'],
+                        taskName,
+                        description,
+                        _startDate,
+                        _endDate,
+                        initialTask['finished'] == 1, // Assuming 'finished' field is 0 or 1
+                        user!['id'],
+                      );
                     } else {
                       // Handle create task logic
                       await createTask(
@@ -269,6 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }
                     Navigator.of(context).pop(); // Close the dialog after task creation/editing
+                    fetchUserTasks(user!['id']); // Refresh tasks after creating/editing task
                   },
                   child: Text(initialTask != null ? "Update" : "Create"),
                 ),
@@ -348,22 +357,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Add a new task icon
       floatingActionButton: GestureDetector(
-          onTap: () => showCreateTaskOverlay(context),
-          child: Container(
-            width: 65,  // Width of add task button
-            height: 65,  // Height of add task button
-            decoration: BoxDecoration (
-              shape: BoxShape.circle,
-              color: Colors.black.withOpacity(0.657),
-            ),
-
-            // Plus icon in center of cirlce
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
-              size: 36,
-            ),
+        onTap: () => showCreateTaskOverlay(context),
+        child: Container(
+          width: 65,  // Width of add task button
+          height: 65,  // Height of add task button
+          decoration: BoxDecoration (
+            shape: BoxShape.circle,
+            color: Colors.black.withOpacity(0.657),
           ),
+
+          // Plus icon in center of cirlce
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 36,
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
 

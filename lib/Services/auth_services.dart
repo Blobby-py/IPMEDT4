@@ -24,6 +24,7 @@ class AuthServices {
     return response;
   }
 
+
   // Function to log the user in
   static Future<http.Response> login(String email, String password) async {
     Map data = {
@@ -47,6 +48,7 @@ class AuthServices {
     return response;
   }
 
+
   // Function to grab all the user data from backend
   static Future<http.Response> fetchUserDetails() async {
     var url = Uri.parse("${baseURL}auth/me");
@@ -61,6 +63,7 @@ class AuthServices {
     return response;
   }
 
+
   // Function to grab all the tasks connected to a specific user
   static Future<http.Response> fetchUserTasks(int userId) async {
     var url = Uri.parse("${baseURL}tasks/show/$userId");
@@ -74,6 +77,7 @@ class AuthServices {
 
     return response;
   }
+
 
   // Function to delete a specific task from backend
   static Future<http.Response> deleteTask(int taskId) async {
@@ -90,8 +94,15 @@ class AuthServices {
     return response;
   }
 
+
   // Function to create a new task
-  static Future<http.Response> createTask(String taskName, String description, DateTime? startDate, DateTime? endDate, var userId) async {
+  static Future<http.Response> createTask(
+      String taskName,
+      String description,
+      DateTime? startDate,
+      DateTime? endDate,
+      var userId,
+      ) async {
     Map data = {
       "name": taskName,
       "description": description,
@@ -115,6 +126,45 @@ class AuthServices {
 
     return response;
   }
+
+
+  // Function to update an existing task
+  static Future<http.Response> updateTask(
+      int taskId,
+      String taskName,
+      String description,
+      DateTime? startDate,
+      DateTime? endDate,
+      bool finished,
+      int userId,
+      ) async {
+    Map data = {
+      "task_id": taskId,
+      "name": taskName,
+      "description": description,
+      "start_date": startDate?.toIso8601String(),
+      "end_date": endDate?.toIso8601String(),
+      "finished": finished,
+      "user_id": userId
+    };
+
+    var body = json.encode(data);
+    var url = Uri.parse("${baseURL}tasks/update"); // Include taskId in URL or body, depending on backend requirements
+    http.Response response = await http.put(
+      url,
+      headers: {
+        ...headers,
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: body,
+    );
+
+    return response;
+  }
+
+
+
 
 }
 
