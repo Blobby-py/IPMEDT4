@@ -105,6 +105,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Function to create an overlay to add a new task or edit an existing task
   void showCreateTaskOverlay(BuildContext context, {Map<String, dynamic>? initialTask}) {
+    // Check if task is finished
+    if (initialTask != null && initialTask['finished'] == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Cannot edit a finished task."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // Initialize text controllers and date variables
     _taskNameController.text = initialTask != null ? initialTask['name'] ?? '' : '';
     _descriptionController.text = initialTask != null ? initialTask['description'] ?? '' : '';
@@ -237,50 +248,51 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.of(context).pop();
                   },
                 ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(3, 200, 98, 100),
-                    foregroundColor: const Color.fromRGBO(0, 0, 0, 100),
+                if (initialTask == null || initialTask['finished'] != 1)  // Only show the create/update button if task is not finished
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(3, 200, 98, 100),
+                      foregroundColor: const Color.fromRGBO(0, 0, 0, 100),
+                    ),
+                    onPressed: () async {
+                      String taskName = _taskNameController.text.trim();
+                      String description = _descriptionController.text.trim();
+                      if (taskName.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(errorSnackBar(context, "Please enter a task name"));
+                        return;
+                      }
+
+                      if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+                        ScaffoldMessenger.of(context).showSnackBar(errorSnackBar(context, "End date must be after start date"));
+                        return;
+                      }
+
+                      if (initialTask != null) {
+                        // Handle update task logic
+                        await AuthServices.updateTask(
+                          initialTask['task_id'],
+                          taskName,
+                          description,
+                          _startDate,
+                          _endDate,
+                          initialTask['finished'] == 1, // Assuming 'finished' field is 0 or 1
+                          user!['id'],
+                        );
+                      } else {
+                        // Handle create task logic
+                        await createTask(
+                          taskName: taskName,
+                          description: description.isEmpty ? null : description,
+                          startDate: _startDate,
+                          endDate: _endDate,
+                          userId: user!['id'],
+                        );
+                      }
+                      Navigator.of(context).pop(); // Close the dialog after task creation/editing
+                      fetchUserTasks(user!['id']); // Refresh tasks after creating/editing task
+                    },
+                    child: Text(initialTask != null ? "Update" : "Create"),
                   ),
-                  onPressed: () async {
-                    String taskName = _taskNameController.text.trim();
-                    String description = _descriptionController.text.trim();
-                    if (taskName.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(errorSnackBar(context, "Please enter a task name"));
-                      return;
-                    }
-
-                    if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-                      ScaffoldMessenger.of(context).showSnackBar(errorSnackBar(context, "End date must be after start date"));
-                      return;
-                    }
-
-                    if (initialTask != null) {
-                      // Handle update task logic
-                      await AuthServices.updateTask(
-                        initialTask['task_id'],
-                        taskName,
-                        description,
-                        _startDate,
-                        _endDate,
-                        initialTask['finished'] == 1, // Assuming 'finished' field is 0 or 1
-                        user!['id'],
-                      );
-                    } else {
-                      // Handle create task logic
-                      await createTask(
-                        taskName: taskName,
-                        description: description.isEmpty ? null : description,
-                        startDate: _startDate,
-                        endDate: _endDate,
-                        userId: user!['id'],
-                      );
-                    }
-                    Navigator.of(context).pop(); // Close the dialog after task creation/editing
-                    fetchUserTasks(user!['id']); // Refresh tasks after creating/editing task
-                  },
-                  child: Text(initialTask != null ? "Update" : "Create"),
-                ),
               ],
             );
           },
@@ -339,7 +351,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () {
-                              showCreateTaskOverlay(context, initialTask: tasks[index]);
+                              if (tasks[index]['finished'] != 1) {  // Only allow editing if task is not finished
+                                showCreateTaskOverlay(context, initialTask: tasks[index]);
+                              }
                             },
                           ),
                         ],
