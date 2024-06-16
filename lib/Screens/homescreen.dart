@@ -113,24 +113,41 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   // Function to update an existing task
-  updateTask(int taskId, {required String taskName, String? description, DateTime? startDate, DateTime? endDate, bool finished = false, required int userId}) async {
+  updateTask(int taskId, String taskName, String? description, DateTime? startDate, DateTime? endDate, bool finished, int userId) async {
+    bool newFinishedStatus = !finished;
+
     http.Response response = await AuthServices.updateTask(
       taskId,
       taskName,
       description ?? "",
       startDate,
       endDate,
-      finished,
+      newFinishedStatus, // Pass the updated finished status
       userId,
     );
+
     if (response.statusCode == 200) {
       print("Task updated successfully");
-      await fetchUserTasks(user!['id']);
+      await fetchUserTasks(user!['id']); // Reload tasks after successful update
     } else {
       print("Failed to update task. Status code: ${response.statusCode}");
       print("Response body: ${response.body}");
     }
   }
+
+  // // Function to toggle the finished status of a task
+  // void toggleTaskStatus(int taskId, bool currentFinishedStatus) async {
+  //   bool newFinishedStatus = !currentFinishedStatus; // Toggle finished status
+  //   await updateTask(
+  //     taskId,
+  //     taskName: tasks.firstWhere((task) => task['task_id'] == taskId)['name'],
+  //     description: tasks.firstWhere((task) => task['task_id'] == taskId)['description'],
+  //     startDate: tasks.firstWhere((task) => task['task_id'] == taskId)['start_date'] != null ? DateTime.parse(tasks.firstWhere((task) => task['task_id'] == taskId)['start_date']) : null,
+  //     endDate: tasks.firstWhere((task) => task['task_id'] == taskId)['end_date'] != null ? DateTime.parse(tasks.firstWhere((task) => task['task_id'] == taskId)['end_date']) : null,
+  //     finished: newFinishedStatus,
+  //     userId: user!['id'],
+  //   );
+  // }
 
 
   // Function to create an overlay to add a new task
@@ -499,6 +516,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: tasks.length,
                   itemBuilder: (context, index) {
                     bool isFinished = tasks[index]['finished'] == 1;
+
                     return ListTile(
                       title: Text(tasks[index]['name']),
                       subtitle: Column(
@@ -512,9 +530,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            isFinished ? Icons.check_circle : Icons.circle,
-                            color: isFinished ? Colors.green : Colors.red,
+                          // Icon button to toggle finished status
+                          GestureDetector(
+                            onTap: () {
+                              bool isFinished = tasks[index]['finished'] == 1;
+                              int taskId = tasks[index]["task_id"];
+                              updateTask(
+                                  taskId,
+                                  tasks[index]['name'],
+                                  tasks[index]['description'],
+                                  tasks[index]['start_date'],
+                                  tasks[index]['end_date'],
+                                  isFinished,
+                                  user!['id']
+                              ); // Toggle the task status
+                            },
+                            child: Icon(
+                              isFinished ? Icons.check_circle : Icons.circle,
+                              color: isFinished ? Colors.green : Colors.red,
+                            ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),

@@ -138,8 +138,8 @@ class AuthServices {
       bool finished,
       int userId,
       ) async {
-    Map data = {
-      "task_id": taskId,
+    Map<String, dynamic> data = {
+      "id": taskId,
       "name": taskName,
       "description": description,
       "start_date": startDate?.toIso8601String(),
@@ -149,7 +149,7 @@ class AuthServices {
     };
 
     var body = json.encode(data);
-    var url = Uri.parse("${baseURL}tasks/update"); // Include taskId in URL or body, depending on backend requirements
+    var url = Uri.parse("${baseURL}tasks/update");
     http.Response response = await http.put(
       url,
       headers: {
@@ -162,8 +162,5 @@ class AuthServices {
 
     return response;
   }
-
-
-
 
 }
