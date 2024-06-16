@@ -12,7 +12,7 @@ class TaskUpdateController extends Controller
     {
         $updatedData = $request->all();
 
-        $task = Task::where('user_id', $request->user_id)->first();
+        $task = Task::where('id', $request->id)->first();
 
         $task->update($updatedData);
 
