@@ -539,8 +539,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   taskId,
                                   tasks[index]['name'],
                                   tasks[index]['description'],
-                                  tasks[index]['start_date'],
-                                  tasks[index]['end_date'],
+                                  tasks[index]['start_date'] = DateTime.parse(tasks[index]["start_date"]),
+                                  tasks[index]['end_date'] = DateTime.parse(tasks[index]["end_date"]),
                                   isFinished,
                                   user!['id']
                               ); // Toggle the task status
