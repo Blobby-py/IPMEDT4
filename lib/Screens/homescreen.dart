@@ -113,7 +113,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   // Function to update an existing task
-  updateTask(int taskId, String taskName, String? description, DateTime? startDate, DateTime? endDate, bool finished, int userId) async {
+  updateTask(
+      int taskId,
+      String taskName,
+      String? description,
+      String? startDate,
+      String? endDate,
+      bool finished,
+      int userId) async {
     bool newFinishedStatus = !finished;
 
     http.Response response = await AuthServices.updateTask(
@@ -134,20 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
       print("Response body: ${response.body}");
     }
   }
-
-  // // Function to toggle the finished status of a task
-  // void toggleTaskStatus(int taskId, bool currentFinishedStatus) async {
-  //   bool newFinishedStatus = !currentFinishedStatus; // Toggle finished status
-  //   await updateTask(
-  //     taskId,
-  //     taskName: tasks.firstWhere((task) => task['task_id'] == taskId)['name'],
-  //     description: tasks.firstWhere((task) => task['task_id'] == taskId)['description'],
-  //     startDate: tasks.firstWhere((task) => task['task_id'] == taskId)['start_date'] != null ? DateTime.parse(tasks.firstWhere((task) => task['task_id'] == taskId)['start_date']) : null,
-  //     endDate: tasks.firstWhere((task) => task['task_id'] == taskId)['end_date'] != null ? DateTime.parse(tasks.firstWhere((task) => task['task_id'] == taskId)['end_date']) : null,
-  //     finished: newFinishedStatus,
-  //     userId: user!['id'],
-  //   );
-  // }
 
 
   // Function to create an overlay to add a new task
@@ -494,6 +487,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
+  // Function to show overview and score
+  void showTrophyOverlay(BuildContext context) {
+    // Sample data for demonstration purposes
+    int totalPlanned = tasks.length;
+    int totalCompleted = tasks.where((task) => task['finished'] == 1).length;
+    int score = totalCompleted * 10; // Example scoring logic
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Overview'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Total Planned: $totalPlanned'),
+              Text('Total Completed: $totalCompleted'),
+              Text('Score: $score'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
 
 
@@ -501,7 +528,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         title: const Text("Home Screen"),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 20.0),
+            child: IconButton(
+              icon: const Icon(Icons.emoji_events),
+              onPressed: () {
+                showTrophyOverlay(context);
+              },
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => fetchUserTasks(user!["id"]),
@@ -517,54 +557,84 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     bool isFinished = tasks[index]['finished'] == 1;
 
-                    return ListTile(
-                      title: Text(tasks[index]['name']),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(tasks[index]['description'] ?? ""),
-                          Text(tasks[index]["start_date"] ?? ""),
-                          Text(tasks[index]["end_date"] ?? ""),
-                        ],
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Icon button to toggle finished status
-                          GestureDetector(
-                            onTap: () {
-                              bool isFinished = tasks[index]['finished'] == 1;
-                              int taskId = tasks[index]["task_id"];
-                              updateTask(
-                                  taskId,
-                                  tasks[index]['name'],
-                                  tasks[index]['description'],
-                                  tasks[index]['start_date'] = DateTime.parse(tasks[index]["start_date"]),
-                                  tasks[index]['end_date'] = DateTime.parse(tasks[index]["end_date"]),
-                                  isFinished,
-                                  user!['id']
-                              ); // Toggle the task status
-                            },
-                            child: Icon(
-                              isFinished ? Icons.check_circle : Icons.circle,
-                              color: isFinished ? Colors.green : Colors.red,
-                            ),
+                      elevation: 10.0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: ListTile(
+                          title: Text(tasks[index]['name']),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(tasks[index]['description'] ?? ""),
+                              Text(tasks[index]["start_date"] ?? ""),
+                              Text(tasks[index]["end_date"] ?? ""),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              deleteTask(tasks[index]['task_id']);
-                            },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+
+                              // Give the correct string to update
+                              GestureDetector(
+                                onTap: () {
+                                  bool isFinished = tasks[index]['finished'] == 1;
+                                  int taskId = tasks[index]["task_id"];
+
+                                  // Handle potential null values for start_date and end_date
+                                  String? startDateString = tasks[index]["start_date"];
+                                  String? endDateString = tasks[index]["end_date"];
+
+                                  String? newStartDate;
+                                  String? newEndDate;
+
+                                  if (startDateString != null) {
+                                    DateTime startDate = DateTime.parse(startDateString);
+                                    newStartDate = "${startDate.year.toString()}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')} ${startDate.hour.toString().padLeft(2, '0')}-${startDate.minute.toString().padLeft(2, '0')}";
+                                  }
+
+                                  if (endDateString != null) {
+                                    DateTime endDate = DateTime.parse(endDateString);
+                                    newEndDate = "${endDate.year.toString()}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')} ${endDate.hour.toString().padLeft(2, '0')}-${endDate.minute.toString().padLeft(2, '0')}";
+                                  }
+
+                                  updateTask(
+                                    taskId,
+                                    tasks[index]['name'],
+                                    tasks[index]['description'],
+                                    newStartDate,
+                                    newEndDate,
+                                    isFinished,
+                                    user!['id'],
+                                  ); // Toggle the task status
+                                },
+                                child: Icon(
+                                  isFinished ? Icons.check_circle : Icons.circle,
+                                  color: isFinished ? Colors.green : Colors.red,
+                                ),
+                              ),
+
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  deleteTask(tasks[index]['task_id']);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  if (tasks[index]['finished'] != 1) {
+                                    showEditTaskOverlay(context, tasks[index]);
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () {
-                              if (tasks[index]['finished'] != 1) {
-                                showEditTaskOverlay(context, tasks[index]);
-                              }
-                            },
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   },
@@ -584,6 +654,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
+
 }
 
 // Extends the functionality of DateTime in order to add isSameDay

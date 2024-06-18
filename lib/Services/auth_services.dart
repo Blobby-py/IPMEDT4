@@ -133,17 +133,21 @@ class AuthServices {
       int taskId,
       String taskName,
       String description,
-      DateTime? startDate,
-      DateTime? endDate,
+      String? startDate,
+      String? endDate,
       bool finished,
       int userId,
       ) async {
+    // Convert DateTime to string if not null
+    // String? startDateString = startDate?.toIso8601String();
+    // String? endDateString = endDate?.toIso8601String();
+
     Map<String, dynamic> data = {
       "id": taskId,
       "name": taskName,
       "description": description,
-      "start_date": startDate?.toIso8601String(),
-      "end_date": endDate?.toIso8601String(),
+      "start_date": startDate,
+      "end_date": endDate,
       "finished": finished,
       "user_id": userId
     };
@@ -162,5 +166,6 @@ class AuthServices {
 
     return response;
   }
+
 
 }
